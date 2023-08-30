@@ -1,4 +1,4 @@
-module github.com/ariontechs/go-sms-sender
+module github.com/casdoor/go-sms-sender
 
 go 1.15
 
