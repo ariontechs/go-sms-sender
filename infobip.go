@@ -1,3 +1,17 @@
+// Copyright 2023 The Casdoor Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package go_sms_sender
 
 import (
@@ -38,16 +52,21 @@ type Destination struct {
 	To string `json:"to"`
 }
 
-func GetInfobipClient(sender string, appKey string, other []string) (*InfobipClient, error) {
-	return &InfobipClient{
-		baseUrl:other[0],
-		sender:sender,
-		apiKey:appKey,
-	}, nil
+func GetInfobipClient(sender string, apiKey string, baseUrl []string) (*InfobipClient, error) {
+	if len(baseUrl) < 1 {
+		return nil, fmt.Errorf("missing parameter: baseUrl")
+	}
+
+	infobipClient := &InfobipClient{
+		baseUrl: baseUrl[0],
+		sender:  sender,
+		apiKey:  apiKey,
+	}
+
+	return infobipClient, nil
 }
 
 func (c *InfobipClient) SendMessage(param map[string]string, targetPhoneNumber ...string) error {
-	
 	code, ok := param["code"]
 	if !ok {
 		return fmt.Errorf("missing parameter: msg code")
@@ -56,7 +75,6 @@ func (c *InfobipClient) SendMessage(param map[string]string, targetPhoneNumber .
 	if len(targetPhoneNumber) < 1 {
 		return fmt.Errorf("missin parer: trgetPhoneNumber")
 	}
-	
 	mobile := targetPhoneNumber[0]
 
 	if strings.HasPrefix(mobile, "0") {
@@ -91,17 +109,12 @@ func (c *InfobipClient) SendMessage(param map[string]string, targetPhoneNumber .
 		req.Header.Set(key, value)
 	}
 
-	// dump, err := httputil.DumpRequestOut(req, true)
-  // if err == nil {
-  //   fmt.Printf("%s\n", dump)
-  // }
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	return  nil
-}
 
+	return nil
+}
